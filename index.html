@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word Magic</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:'Fredoka','Comic Sans MS',system-ui,sans-serif;color:#4a3b6b;background:linear-gradient(160deg,#ffe3f1 0%,#e8e0ff 50%,#d6f3ff 100%);background-attachment:fixed;padding:14px}
+.wrap{max-width:440px;margin:0 auto}
+header{text-align:center;position:relative;margin-bottom:12px}
+h1{margin:0;font-size:34px;font-weight:600;color:#e0559a;text-shadow:2px 2px 0 #fff}
+header p{margin:2px 0 0;font-size:15px;color:#8a76b8}
+#snd{position:absolute;right:0;top:0;width:42px;height:42px;border-radius:50%;border:none;background:#fff;font-size:20px;cursor:pointer;box-shadow:0 3px 0 #e6d9ff}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;height:48px;border:none;border-radius:24px;font-family:inherit;font-size:16px;font-weight:500;cursor:pointer;background:#fff;color:#8a76b8;box-shadow:0 4px 0 #e6d9ff}
+.tab.on{background:#ff8fb8;color:#fff;box-shadow:0 4px 0 #e0559a}
+.card{background:#fff;border-radius:28px;padding:18px 16px 20px;box-shadow:0 8px 0 #e6d9ff,0 14px 30px rgba(160,120,220,.18)}
+.meta{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:500}
+.score{background:#fff4c9;color:#b57a00;padding:4px 12px;border-radius:14px}
+.bar{height:12px;background:#f1e9ff;border-radius:6px;margin:10px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff8fb8,#ffb86b);border-radius:6px;transition:width .4s}
+.emoji{font-size:76px;text-align:center;line-height:1.2;margin-top:8px;animation:float 2.6s ease-in-out infinite}
+.clue{text-align:center;font-size:18px;min-height:28px;margin:2px 6px 8px;color:#6b58a0}
+.soft{display:block;margin:0 auto;border:none;border-radius:20px;padding:8px 18px;font-family:inherit;font-size:15px;font-weight:500;background:#e8f6ff;color:#2f86b5;cursor:pointer;box-shadow:0 3px 0 #bfe3f7}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0}
+.sl{width:36px;height:46px;border:3px dashed #cdb8ff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#e0559a;background:#faf6ff}
+.sl.f{border-style:solid;border-color:#ff8fb8;background:#fff0f6;animation:pop .2s}
+.lt{width:48px;height:52px;border:none;border-radius:14px;font-family:inherit;font-size:24px;font-weight:600;color:#fff;cursor:pointer;border-bottom:5px solid rgba(0,0,0,.2)}
+.lt:active{transform:translateY(3px);border-bottom-width:2px}
+.lt.used{opacity:.2;pointer-events:none}
+.fb{min-height:30px;text-align:center;font-size:20px;font-weight:600;margin:6px 0 10px}
+.btns{display:flex;gap:8px}
+.big{flex:1;height:52px;border:none;border-radius:26px;font-family:inherit;font-size:17px;font-weight:600;cursor:pointer;color:#fff}
+.big:active{transform:translateY(3px)}
+.b-pink{background:#ff6fa5;box-shadow:0 4px 0 #d94684}
+.b-lilac{background:#b79bff;box-shadow:0 4px 0 #8f70e0}
+.b-blue{background:#5cc3f0;box-shadow:0 4px 0 #2f9ccc}
+.b-mint{background:#5fd6a8;box-shadow:0 4px 0 #34ae80}
+.sent{font-size:23px;font-weight:500;text-align:center;line-height:1.5;margin:14px 6px 22px;min-height:70px}
+.fill{background:#fff0f6;color:#e0559a;padding:0 8px;border-radius:10px;font-weight:600}
+.hint{font-size:14px;text-align:center;color:#8a76b8;margin:14px 0 0}
+.shake{animation:shake .4s}
+.hide{display:none}
+.bit{position:fixed;pointer-events:none;font-size:26px;z-index:9;animation:fly 1.2s ease-out forwards}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes fly{0%{transform:translate(0,0) scale(.6);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(1.2);opacity:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Word Magic &#10024;</h1>
+<p>Spell it. Say it. Win stars!</p>
+<button id="snd" aria-label="Sound on or off">&#128266;</button>
+</header>
+
+<div class="tabs">
+<button class="tab on" id="m1">&#129513; Letter Fun</button>
+<button class="tab" id="m2">&#127752; Is or Are?</button>
+</div>
+
+<div class="card" id="g1">
+<div class="meta"><span id="p1"></span><span class="score" id="s1"></span></div>
+<div class="bar"><i id="b1"></i></div>
+<div class="emoji" id="e1"></div>
+<div class="clue" id="c1"></div>
+<button class="soft" id="say">&#128266; Listen</button>
+<div class="row" id="slots"></div>
+<div class="row" id="pool"></div>
+<div class="fb" id="fb1"></div>
+<div class="btns">
+<button class="big b-lilac" id="del">&#8630; Undo</button>
+<button class="big b-pink" id="chk">Check &#10004;</button>
+<button class="big b-blue" id="nx1">Skip</button>
+</div>
+</div>
+
+<div class="card hide" id="g2">
+<div class="meta"><span id="p2"></span><span class="score" id="s2"></span></div>
+<div class="bar"><i id="b2"></i></div>
+<div class="emoji" id="e2"></div>
+<div class="sent" id="sent"></div>
+<div class="btns">
+<button class="big b-pink" id="is">There is</button>
+<button class="big b-blue" id="are">There are</button>
+</div>
+<div class="fb" id="fb2" style="margin-top:14px"></div>
+<button class="big b-mint" id="nx2" style="width:100%">Skip</button>
+<p class="hint">One thing? Use <b>is</b>. Many things? Use <b>are</b>.</p>
+</div>
+</div>
+
+<script>
+const W=[
+["shy","\u{1F648}","Feeling nervous with new people"],
+["help","\u{1F91D}","Give a hand to someone"],
+["birthday","\u{1F382}","The day you were born"],
+["family","\u{1F46A}","Mom, dad, kids and more"],
+["dinner","\u{1F37D}\uFE0F","The meal we eat in the evening"],
+["market","\u{1F6D2}","A place to buy fresh food"],
+["happy","\u{1F60A}","Feeling very good"],
+["alone","\u{1F9CD}\u200D\u2640\uFE0F","By yourself, with nobody else"],
+["town","\u{1F3D8}\uFE0F","A place smaller than a city"],
+["rest","\u{1F634}","Relax and take a break"],
+["picture","\u{1F4F8}","A photo or a drawing"],
+["tonight","\u{1F319}","This evening"],
+["daughter","\u{1F467}","A girl child of her parents"],
+["youngest","\u{1F476}","The smallest in age"],
+["busy","\u{1F3C3}\u200D\u2640\uFE0F","Having lots of things to do"],
+["ate","\u{1F374}","The past of the word eat"],
+["tasty","\u{1F60B}","Yummy and delicious"],
+["everyone","\u{1F46B}","All the people"],
+["farmers","\u{1F469}\u200D\u{1F33E}","People who grow our food"],
+["cooking","\u{1F373}","Making food in the kitchen"],
+["flour","\u{1F33E}","A powder for baking bread"],
+["corn","\u{1F33D}","A yellow vegetable on a cob"],
+["small","\u{1F42D}","Not big"],
+["nice","\u{1F338}","Kind and good"]
+];
+const S=[
+["___ a big market in our town.","is","\u{1F6D2}"],
+["___ five farmers at the market.","are","\u{1F469}\u200D\u{1F33E}"],
+["___ some flour in the bag.","is","\u{1F33E}"],
+["___ many people at the dinner.","are","\u{1F37D}\uFE0F"],
+["___ a picture on the wall.","is","\u{1F5BC}\uFE0F"],
+["___ a birthday cake on the table.","is","\u{1F382}"],
+["___ corn in the basket.","is","\u{1F33D}"],
+["___ three small girls in my family.","are","\u{1F467}"],
+["___ tasty food on the table.","is","\u{1F372}"],
+["___ a shy girl in my class.","is","\u{1F648}"],
+["___ ten children at the party.","are","\u{1F388}"],
+["___ two busy cooks in the kitchen.","are","\u{1F469}\u200D\u{1F373}"]
+];
+const COLORS=["#ff8fb8","#b79bff","#5cc3f0","#5fd6a8","#ffb86b","#ff8a80"];
+const PRAISE=["Awesome!","Super!","You did it!","Brilliant!","Amazing!","Perfect!","Wow!"];
+const TRY=["Almost! Try again","Oops, try once more","You can do it!","Nearly there!"];
+
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+
+let mute=false,ac;
+function tone(f,t,d){
+if(mute)return;
+try{
+ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime+t;
+o.type="sine";o.frequency.value=f;
+g.gain.setValueAtTime(.15,n);g.gain.exponentialRampToValueAtTime(.001,n+d);
+o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+d);
+}catch(e){}
+}
+function good(){tone(523,0,.15);tone(659,.12,.15);tone(784,.24,.3)}
+function bad(){tone(240,0,.25)}
+$("snd").onclick=()=>{mute=!mute;$("snd").innerHTML=mute?"&#128263;":"&#128266;"};
+
+function burst(){
+const bits=["\u{1F389}","\u2B50","\u{1F496}","\u2728","\u{1F338}","\u{1F31F}"];
+for(let k=0;k<22;k++){
+const s=document.createElement("span");
+s.className="bit";
+s.textContent=pick(bits);
+s.style.left=(30+Math.random()*40)+"vw";
+s.style.top="45vh";
+s.style.setProperty("--dx",(Math.random()*300-150)+"px");
+s.style.setProperty("--dy",(Math.random()*-320-40)+"px");
+s.style.setProperty("--r",(Math.random()*360-180)+"deg");
+document.body.appendChild(s);
+setTimeout(()=>s.remove(),1300);
+}
+}
+function shake(el){el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake")}
+function setFb(el,txt,ok){el.style.color=ok?"#2fa77a":"#e0556a";el.textContent=txt}
+
+let ord,i,score,pool,picked,solved;
+function start1(){ord=shuffle(W);i=0;score=0;load1()}
+function load1(){
+if(i>=ord.length){
+$("slots").innerHTML="";$("pool").innerHTML="";
+$("e1").textContent="\u{1F3C6}";
+$("c1").textContent="You finished! You got "+score+" out of "+ord.length;
+$("p1").textContent="All done";
+$("b1").style.width="100%";
+setFb($("fb1"),"Great spelling, superstar!",true);
+$("nx1").textContent="Play again";
+burst();return;
+}
+const w=ord[i][0];solved=false;picked=[];
+let p=w.split(""),t=0;
+do{p=shuffle(p);t++}while(p.join("")===w&&t<20);
+pool=p;
+$("e1").textContent=ord[i][1];
+$("c1").textContent=ord[i][2];
+$("nx1").textContent="Skip \u279C";
+$("fb1").textContent="";
+draw1();
+}
+function draw1(){
+if(i>=ord.length)return;
+const w=ord[i][0];
+$("p1").textContent="Word "+(i+1)+" of "+ord.length;
+$("s1").textContent="\u2B50 "+score;
+$("b1").style.width=(i/ord.length*100)+"%";
+$("slots").innerHTML=w.split("").map((c,k)=>picked[k]!==undefined?'<div class="sl f">'+pool[picked[k]]+'</div>':'<div class="sl"></div>').join("");
+$("pool").innerHTML=pool.map((c,k)=>'<button class="lt'+(picked.includes(k)?" used":"")+'" data-k="'+k+'" style="background:'+COLORS[k%COLORS.length]+'">'+c+'</button>').join("");
+}
+$("pool").addEventListener("click",e=>{
+const b=e.target.closest("button");if(!b||solved)return;
+const k=+b.dataset.k;
+if(picked.includes(k)||picked.length>=pool.length)return;
+picked.push(k);$("fb1").textContent="";draw1();tone(660,0,.06);
+});
+$("del").onclick=()=>{if(solved)return;picked.pop();$("fb1").textContent="";draw1()};
+$("chk").onclick=()=>{
+if(i>=ord.length||solved)return;
+const w=ord[i][0];
+if(picked.length<w.length){setFb($("fb1"),"Use all the letters first",false);shake($("slots"));return}
+const a=picked.map(k=>pool[k]).join("");
+if(a===w){
+solved=true;score++;
+setFb($("fb1"),pick(PRAISE),true);
+$("nx1").textContent="Next \u279C";
+$("s1").textContent="\u2B50 "+score;
+good();burst();
+}else{
+setFb($("fb1"),pick(TRY),false);shake($("slots"));bad();
+}
+};
+$("nx1").onclick=()=>{if(i>=ord.length){start1();return}i++;load1()};
+$("say").onclick=()=>{
+if(i>=ord.length)return;
+try{
+const u=new SpeechSynthesisUtterance(ord[i][0]);
+u.lang="en-US";u.rate=0.8;
+speechSynthesis.cancel();speechSynthesis.speak(u);
+}catch(e){setFb($("fb1"),"Sound is not available here",false)}
+};
+
+let so,j,sc,done;
+function start2(){so=shuffle(S);j=0;sc=0;load2()}
+function load2(){
+if(j>=so.length){
+$("e2").textContent="\u{1F3C6}";
+$("sent").textContent="You finished! You got "+sc+" out of "+so.length;
+$("p2").textContent="All done";
+$("b2").style.width="100%";
+setFb($("fb2"),"You are a grammar star!",true);
+$("nx2").textContent="Play again";
+burst();return;
+}
+done=false;
+$("p2").textContent="Question "+(j+1)+" of "+so.length;
+$("s2").textContent="\u2B50 "+sc;
+$("b2").style.width=(j/so.length*100)+"%";
+$("e2").textContent=so[j][2];
+$("sent").textContent=so[j][0];
+$("fb2").textContent="";
+$("nx2").textContent="Skip \u279C";
+}
+function ans(v){
+if(j>=so.length||done)return;
+if(v===so[j][1]){
+done=true;sc++;
+$("sent").innerHTML=so[j][0].replace("___",'<span class="fill">There '+v+'</span>');
+setFb($("fb2"),pick(PRAISE),true);
+$("s2").textContent="\u2B50 "+sc;
+$("nx2").textContent="Next \u279C";
+good();burst();
+}else{
+setFb($("fb2"),pick(TRY),false);shake($("sent"));bad();
+}
+}
+$("is").onclick=()=>ans("is");
+$("are").onclick=()=>ans("are");
+$("nx2").onclick=()=>{if(j>=so.length){start2();return}j++;load2()};
+
+function show(n){
+$("g1").classList.toggle("hide",n!==1);
+$("g2").classList.toggle("hide",n!==2);
+$("m1").className="tab"+(n===1?" on":"");
+$("m2").className="tab"+(n===2?" on":"");
+}
+$("m1").onclick=()=>show(1);
+$("m2").onclick=()=>show(2);
+start1();start2();show(1);
+</script>
+</body>
+</html>
